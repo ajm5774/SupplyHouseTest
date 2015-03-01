@@ -1,0 +1,21 @@
+There are several types of DB patterns to handle inheritance. Any of the approaches
+would work, but each have their unique advantages depending on the resources available
+and the operations performed on the data.
+
+Assuming that products are desired to be queried regardless of supplier or additional
+ column data, then Class table Inheritance is the best approach. 
+ See: http://martinfowler.com/eaaCatalog/classTableInheritance.html
+ 
+ With this approach, a database table is created for each inheritance class and base class.
+ Applying this pattern to this case would yield the following Tables:
+ 
+ Product
+ ProductTypeA
+ ProductTypeB
+ 
+ (note: ProductTypeA and ProductTypeB are placeholder names for products with additional
+ attributes to plain "Product".)
+ 
+ Where the similarities(ex. Product ID, quantity) for each different product 
+ (ex. ProductA, ProductB) are stored in a common table (ex. Product). Attributes
+ that aren't similar get stored in separate databases (ex. brand).
