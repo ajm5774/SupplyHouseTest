@@ -36,8 +36,11 @@ public class Swoosh {
 		swooshPoints = scalePoints(swooshPoints, printRatio);
 		
 		int[][]newSwooshPoints;
+		//added rows, add points to new rows so they arent empty
 		if(newWidth >= origWidth)
 			newSwooshPoints = addNewPoints(swooshPoints, newHeight);
+		//Multiple rows collapse down to a single row leaving 2+
+		//points per row. Only use two points per row.
 		else
 		{
 			int numRows = (int)(7.0 * printRatio)+1;
@@ -46,8 +49,8 @@ public class Swoosh {
 				newSwooshPoints = addNewPoints(newSwooshPoints, newHeight);
 		}
 		
+		//Use the coordinates to generate a filled grid, and print
 		String swooshString = stringSwoosh(newSwooshPoints, newHeight, newWidth);
-		
 		System.out.println(swooshString);
 	}
 	
@@ -114,7 +117,8 @@ public class Swoosh {
 	/*
 	 * Limit the stars per row to only 2 
 	 * 
-	 * Approach 1, grab the first two points (topmost points if two rows collapse down to one)
+	 * Approach 2, grab the first two points (topmost points if two rows collapse down to one)
+	 * Ideally, the two consecutive points with the longest length should be picked
 	 */
 	private int[][] filterTwoPerRow2(int[][] swooshPoints, int newHeight)
 	{
@@ -145,6 +149,9 @@ public class Swoosh {
 		return newSwooshPoints;
 	}
 	
+	/*
+	 * Fill in the intermediate rows by averaging the coordinates in surrounding rows
+	 */
 	private int[][] addNewPoints(int[][] swooshPoints, int newHeight)
 	{
 		int[][] newSwooshPoints = new int[newHeight*2][2];
@@ -165,13 +172,13 @@ public class Swoosh {
 			newSwooshPoints[pntIndex][1] = col;
 			pntIndex++;
 			
-			//add new points by averaging the x and y differences of previous and next row 
+			//get next row
 			if(i < swooshPoints.length-2)
 			{
 				nextRow = swooshPoints[i+2][0];
 				nextCol = swooshPoints[i+2][1];
 			}
-			//last row needs to be extrapolated
+			//last row needs to be extrapolated and created manually
 			else
 			{
 				//use the last 
@@ -181,11 +188,12 @@ public class Swoosh {
 				nextCol = (int)(col + colDiff);
 			}
 			
+			//add new points by averaging the x and y differences of previous and next row 
 			rowDiff = nextRow-row;
 			for(int j = 1; j < rowDiff; j++)
 			{
 				newRow = row + j;
-				colDiff = (double)(nextCol - col) * ((double)j/(double)rowDiff);
+				colDiff = (double)(nextCol - col) * ((double)j/(double)rowDiff);//average the points
 				newCol = (int)(colDiff) + col;
 				newSwooshPoints[pntIndex][0] = newRow;
 				newSwooshPoints[pntIndex][1] = newCol;
@@ -198,14 +206,19 @@ public class Swoosh {
 		return newSwooshPoints;
 	}
 	
+	/*
+	 * Print out the swoosh
+	 */
 	private String stringSwoosh(int[][] swooshPoints, int newHeight, int newWidth)
 	{
 		String[][] resultArray = new String[newHeight][newWidth];
 		StringBuilder resultString = new StringBuilder("");
 		
+		//fill grid with all -
 		for(String[] row: resultArray)
 			Arrays.fill(row, "-");
 		
+		//mark the coordinate in grid with an x
 		for(int[] points: swooshPoints)
 		{
 			resultArray[points[0]][points[1]] = "x";
